@@ -1,0 +1,116 @@
+---
+- name: Ruby on Rails Setup for Ubuntu 20.04
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  become: yes
+
+  vars:
+    ruby_version: 2.7.5
+    rails_version: '~> 6.1.0'
+    rbenv_path: "~/.rbenv"
+    rbenv_bin_path: "{{ rbenv_path }}/bin"
+
+  tasks:
+    - name: Print Start Timestamp
+      debug:
+        msg: 
+          - "Playbook started at {{ lookup('pipe','date \"+%Y-%m-%d %H:%M:%S\"') }}"
+          - "Expected completion at {{ lookup('pipe','date -d \"+13 minutes\" \"+%Y-%m-%d %H:%M:%S\"') }}"
+
+    # 1. 必要な依存関係のインストール
+    - name: Install required packages
+      apt:
+        name:
+          - autoconf
+          - bison
+          - build-essential
+          - libssl-dev
+          - libyaml-dev
+          - libreadline6-dev
+          - zlib1g-dev
+          - libncurses5-dev
+          - libffi-dev
+          - libgdbm6
+          - libgdbm-dev
+          - libpq-dev
+        state: present
+
+    # 2. rbenvとruby-buildのインストール
+    - name: Clone rbenv
+      git:
+        repo: https://github.com/rbenv/rbenv.git
+        dest: "{{ rbenv_path }}"
+      become: no
+
+    - name: Clone ruby-build as rbenv plugin
+      git:
+        repo: https://github.com/rbenv/ruby-build.git
+        dest: "{{ rbenv_path }}/plugins/ruby-build"
+      become: no
+
+    - name: Add rbenv to bashrc
+      lineinfile:
+        path: ~/.bashrc
+        line: 'export PATH="{{ rbenv_bin_path }}:$PATH"'
+        insertafter: EOF
+      become: no
+
+    - name: Add rbenv shims to bashrc
+      lineinfile:
+        path: ~/.bashrc
+        line: 'export PATH="{{ rbenv_path }}/shims:$PATH"'
+        insertafter: EOF
+      become: no
+
+    - name: Initialize rbenv in bashrc
+      lineinfile:
+        path: ~/.bashrc
+        line: 'eval "$({{ rbenv_bin_path }}/rbenv init -)"'
+        insertafter: EOF
+      become: no
+
+    # Check the lines
+    - name: Check if rbenv paths are in .bashrc
+      command: "grep -q '{{ item }}' ~/.bashrc"
+      with_items:
+        - 'export PATH="{{ rbenv_bin_path }}:$PATH"'
+        - 'export PATH="{{ rbenv_path }}/shims:$PATH"'
+        - 'eval "$({{ rbenv_bin_path }}/rbenv init -)"'
+      ignore_errors: yes
+      become: no
+
+    # 3. Rubyのインストール
+    - name: Install Ruby using rbenv
+      command:
+        cmd: "{{ rbenv_bin_path }}/rbenv install {{ ruby_version }}"
+        creates: "{{ rbenv_path }}/versions/{{ ruby_version }}"
+      environment:
+        PATH: "{{ rbenv_bin_path }}:{{ ansible_env.PATH }}"
+      become: no
+
+    - name: Set global Ruby version
+      command:
+        cmd: "{{ rbenv_bin_path }}/rbenv global {{ ruby_version }}"
+      environment:
+        PATH: "{{ rbenv_bin_path }}:{{ ansible_env.PATH }}"
+      become: no
+
+    # 4. BundlerとRailsのインストール
+    - name: Install Bundler
+      command:
+        cmd: "{{ rbenv_bin_path }}/rbenv exec gem install bundler --no-document"
+      environment:
+        PATH: "{{ rbenv_bin_path }}:{{ ansible_env.PATH }}"
+      become: no
+
+    - name: Install Rails {{ rails_version }}
+      command:
+        cmd: "{{ rbenv_bin_path }}/rbenv exec gem install rails -v '{{ rails_version }}' --no-document"
+      environment:
+        PATH: "{{ rbenv_bin_path }}:{{ ansible_env.PATH }}"
+      become: no
+
+    - name: Print End Timestamp
+      debug:
+        msg: "Playbook ended at {{ lookup('pipe','date \"+%Y-%m-%d %H:%M:%S\"') }}"

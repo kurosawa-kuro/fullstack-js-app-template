@@ -1,6 +1,6 @@
 # fullstack-js-app-template
 
-## Frontend
+## [Frontend](./notes/Frontend.md)
 - HTML
 - CSS
   - Tailwind
@@ -12,14 +12,14 @@
     - Mock Service Worker (Mocking)
 - Vite (Build Tool)
 
-## Backend
+## [Backend](./notes/Backend.md)
 - JavaScript
   - Express (Web Framework)
     - Prisma (ORM for Postgresql)
       - Postgresql (Database)
     - Jest + SuperTest (Testing)
 
-## Env (Development & Deployment)
+## [Env](./notes/Env.md)
 - Docker-compose (Containerization)
 - Vagrant + VirtualBox (Virtualization)
 - Ansible (Provisioning)

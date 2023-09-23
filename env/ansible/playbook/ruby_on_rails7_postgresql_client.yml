@@ -1,0 +1,78 @@
+---
+- hosts: localhost
+  connection: local
+  become: yes
+  vars:
+    ruby_version: "3.1.2"
+    rails_version: "7.0.4"
+    dependencies:
+      - curl
+      - gpg
+      - dirmngr
+      - libgdbm-dev
+      - libncurses5-dev
+      - automake
+      - libtool
+      - bison
+      - libffi-dev
+      - libpq-dev
+
+  tasks:
+    - name: Print Start Timestamp for Rails 7 Setup
+      debug:
+        msg: 
+          - "Rails 7 Playbook started at {{ lookup('pipe','date \"+%Y-%m-%d %H:%M:%S\"') }}"
+          - "Expected completion for Rails 7 at {{ lookup('pipe','date -d \"+13 minutes\" \"+%Y-%m-%d %H:%M:%S\"') }}"
+
+    - name: (1/8) Install required dependencies
+      apt:
+        name: "{{ dependencies }}"
+        state: present
+
+    - name: (2/8) Import RVM GPG keys
+      shell: "{{ item }}"
+      loop:
+        - "curl -sSL https://rvm.io/mpapis.asc | gpg --import -"
+        - "curl -sSL https://rvm.io/pkuczynski.asc | gpg --import -"
+      ignore_errors: yes
+      become: no
+
+    - name: (3/8) Import RVM specific GPG key
+      shell: "gpg --keyserver hkp://keyserver.ubuntu.com --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB"
+      become: no
+
+    - name: (4/8) Install RVM for user vagrant
+      shell: "curl -sSL https://get.rvm.io | bash -s stable"
+      args:
+        executable: /bin/bash
+        creates: "/home/vagrant/.rvm/scripts/rvm"
+      become: no
+
+    - name: (5/8) Install Ruby using RVM
+      shell: "source /home/vagrant/.rvm/scripts/rvm && rvm install {{ ruby_version }}"
+      args:
+        executable: /bin/bash
+      become: no
+
+    - name: (6/8) Set default Ruby version
+      shell: "source /home/vagrant/.rvm/scripts/rvm && rvm use {{ ruby_version }} --default"
+      args:
+        executable: /bin/bash
+      become: no
+
+    - name: (7/8) Install Rails
+      shell: "source /home/vagrant/.rvm/scripts/rvm && gem install rails -v {{ rails_version }}"
+      args:
+        executable: /bin/bash
+      become: no
+
+    - name: (8/8) Ensure RVM is sourced upon login
+      lineinfile:
+        path: "/home/vagrant/.bashrc"
+        line: 'source /home/vagrant/.rvm/scripts/rvm'
+        state: present
+      become: no
+
+    - name: Print End Timestamp for Rails 7 Setup
+      debug:
+        msg: "Rails 7 Playbook ended at {{ lookup('pipe','date \"+%Y-%m-%d %H:%M:%S\"') }}"

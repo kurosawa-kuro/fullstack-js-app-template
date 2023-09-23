@@ -1,0 +1,7 @@
+- hosts: localhost
+  become: yes  # 管理者権限で実行
+  tasks:
+    - name: Install Git
+      apt:
+        name: git
+        state: present

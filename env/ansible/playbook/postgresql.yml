@@ -1,0 +1,106 @@
+---
+- hosts: localhost
+  connection: local
+  become: yes
+  vars:
+    postgres_version: "14"
+    postgres_conf_dir: "/etc/postgresql/{{ postgres_version }}/main"
+    postgres_password: "dev_password"
+    postgres_user:
+      name: "dev_user"
+      password: "dev_password"
+      role_attr_flags: CREATEDB
+    databases:
+      - name: "development_db"
+        owner: "{{ postgres_user.name }}"
+      - name: "test_db"
+        owner: "{{ postgres_user.name }}"
+    pg_hba_conf_content: |
+      # Database administrative login by Unix domain socket
+      local   all             postgres                                trust
+      local   all             all                                     peer
+      # IPv4 local connections:
+      host    all             all             127.0.0.1/32            scram-sha-256
+      # External IPv4 connections:
+      host    all             all             0.0.0.0/0               md5
+      # IPv6 local connections:
+      host    all             all             ::1/128                 scram-sha-256
+      # External IPv6 connections:
+      host    all             all             ::/0                    md5
+      # Allow replication connections from localhost, by a user with the
+      # replication privilege.
+      local   replication     all                                     peer
+      host    replication     all             127.0.0.1/32            scram-sha-256
+
+  tasks:
+    - name: Print Start Timestamp
+      debug:
+        msg: 
+          - "Playbook started at {{ lookup('pipe','date \"+%Y-%m-%d %H:%M:%S\"') }}"
+          - "Expected completion at {{ lookup('pipe','date -d \"+1 minutes\" \"+%Y-%m-%d %H:%M:%S\"') }}"
+
+    - name: (1/9)Install PostgreSQL server and contrib
+      apt:
+        name: 
+          - postgresql
+          - postgresql-contrib
+        state: present
+
+    - name: (2/9)Install necessary python packages
+      apt:
+        name: python3-psycopg2
+        state: present
+
+    - name: (3/9)Ensure PostgreSQL service is running
+      service:
+        name: postgresql
+        state: started
+        enabled: yes
+
+    - name: (4/9)Update pg_hba.conf
+      copy:
+        dest: "{{ postgres_conf_dir }}/pg_hba.conf"
+        content: "{{ pg_hba_conf_content }}"
+        owner: postgres
+        group: postgres
+        mode: '0600'
+      notify: restart postgresql
+
+    - meta: flush_handlers
+
+    - name: (5/9)Set password for the postgres user using direct psql command
+      command: sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD '{{ postgres_password }}';"
+
+    - name: (6/9)Create PostgreSQL user
+      postgresql_user:
+        name: "{{ postgres_user.name }}"
+        password: "{{ postgres_user.password }}"
+        role_attr_flags: "{{ postgres_user.role_attr_flags }}"
+        login_user: postgres
+        login_password: "{{ postgres_password }}"
+
+    - name: (7/9)Create databases
+      postgresql_db:
+        name: "{{ item.name }}"
+        owner: "{{ item.owner }}"
+        login_user: postgres
+        login_password: "{{ postgres_password }}"
+      loop: "{{ databases }}"
+
+    - name: (9/9)Update postgresql.conf to allow external connections
+      lineinfile:
+        path: "{{ postgres_conf_dir }}/postgresql.conf"
+        regexp: '^listen_addresses\s+='
+        line: "listen_addresses = '*'"
+        state: present
+      notify: restart postgresql
+
+    - name: Print End Timestamp
+      debug:
+        msg: "Playbook ended at {{ lookup('pipe','date \"+%Y-%m-%d %H:%M:%S\"') }}"
+
+  handlers:
+    - name: restart postgresql
+      service:
+        name: postgresql
+        state: restarted

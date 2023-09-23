@@ -1,0 +1,44 @@
+---
+- name: Install Node.js 18 on Ubuntu 20.04
+  hosts: localhost
+  connection: local
+  become: yes
+  tasks:
+
+    - name: Remove existing Node.js
+      apt:
+        name: nodejs
+        state: absent
+        autoremove: yes
+        purge: yes
+
+    - name: Autoclean to remove residual packages
+      apt:
+        autoremove: yes
+        autoclean: yes
+
+    - name: Add NodeSource repository for Node.js v18
+      shell: curl -sL https://deb.nodesource.com/setup_18.x | bash -
+
+    - name: Install Node.js v18
+      apt:
+        name: nodejs
+        state: present
+
+    - name: Check node version
+      command: node -v
+      register: node_version
+      changed_when: false
+
+    - name: Print node version
+      debug:
+        msg: "Node.js version is {{ node_version.stdout }}"
+
+    - name: Check npm version
+      command: npm -v
+      register: npm_version
+      changed_when: false
+
+    - name: Print npm version
+      debug:
+        msg: "NPM version is {{ npm_version.stdout }}"

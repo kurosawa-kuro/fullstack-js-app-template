@@ -22,11 +22,7 @@ dotenv.config();
 // Create Express Application
 const app = express();
 
-const { NODE_ENV } = process.env;
-
-if (NODE_ENV === "development") {
-    app.use(morgan("dev"));
-}
+app.use(morgan("dev"));
 
 // Middleware Configuration
 app.use(express.json(), express.urlencoded({ extended: true }), cookieParser());

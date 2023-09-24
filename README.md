@@ -41,7 +41,6 @@
 
 ### バックエンドの起動
 ```sh
-cd backend
 node backend/server.js
 ````
 

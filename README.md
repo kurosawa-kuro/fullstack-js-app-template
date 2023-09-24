@@ -34,6 +34,8 @@
 ## [Support](./notes/Support.md)
 - ChatGPT4: このプロジェクトのサポートには、ChatGPT4が利用可能です。
 
+## [Training](./notes/Training.md)
+
 ## Commands
 以下のコマンドで、バックエンドとフロントエンドの起動・テストが行えます。
 

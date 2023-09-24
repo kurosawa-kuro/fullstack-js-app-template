@@ -46,28 +46,23 @@ app.use(
 // app.use("/api/upload", uploadRoutes);
 
 // File Upload Endpoint
-app.use("/uploads", express.static(path.join(import.meta.url, "/uploads")));
+// app.use("/uploads", express.static(path.join(__dirname, "/uploads")));
 
 // Serve Static Files in Production
-if (NODE_ENV === "production") {
-    app.use(express.static(path.join(import.meta.url, "/frontend/build")));
-    app.get("*", (_req, res) =>
-        res.sendFile(path.resolve(import.meta.url, "frontend", "build", "index.html"))
-    );
-} else {
-    app.get("/api/", (_req, res) => {
-        res.send("API is running....");
-    });
-    app.get("/api/endpoints", (request, response) => {
-        const originalEndpoints = expressListEndpoints(app);
 
-        const sanitizedEndpoints = originalEndpoints.map((endpoint) => {
-            const { middlewares, ...sanitizedEndpoint } = endpoint;
-            return sanitizedEndpoint;
-        });
-        response.send(sanitizedEndpoints);
+app.get("/api/", (_req, res) => {
+    res.send("API is running....");
+});
+app.get("/api/endpoints", (request, response) => {
+    const originalEndpoints = expressListEndpoints(app);
+
+    const sanitizedEndpoints = originalEndpoints.map((endpoint) => {
+        const { middlewares, ...sanitizedEndpoint } = endpoint;
+        return sanitizedEndpoint;
     });
-}
+    response.send(sanitizedEndpoints);
+});
+
 
 // Error Handlers
 app.use(notFound, errorHandler);

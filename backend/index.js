@@ -35,6 +35,8 @@ app.use(
     })
 );
 
+// console.log(process.env.DEVELOPE_DB_HOST)
+
 // Express Routes
 // app.use("/api/auth", authRoutes);
 // app.use("/api/users", userRoutes);

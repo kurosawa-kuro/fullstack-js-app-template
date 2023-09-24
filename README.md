@@ -52,12 +52,18 @@ cd frontend
 npm start
 ```
 
+![2023-09-24_13h14_54](https://github.com/kurosawa-kuro/fullstack-js-app-template/assets/15902862/e3b83eb4-7110-4174-b9b5-2ce02e238439)
+
+
 ### バックエンドのテスト
 
 ```sh
 cd backend
 npm test
 ```
+![2023-09-24_13h13_43](https://github.com/kurosawa-kuro/fullstack-js-app-template/assets/15902862/83a92e3e-7272-42cd-8e85-525bea3fdba9)
+
+
 
 ### フロントエンドのテスト
 
@@ -65,3 +71,6 @@ npm test
 cd frontend
 npm test
 ```
+![2023-09-24_13h14_23](https://github.com/kurosawa-kuro/fullstack-js-app-template/assets/15902862/457e4441-ff2b-4b69-baa3-f44262d8f214)
+
+

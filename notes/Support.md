@@ -1,248 +1,89 @@
+
 # サポート
 
-## ChatGPT4
+ChatGPT4の活用により、コーディングに関する様々な質問や疑問に対するサポートが受けられます。以下で、いくつかの質問例とその解説を紹介します。
 
-ChatGPT4を使用して、さまざまなコーディングの質問や疑問を解決できます。以下に、一部の質問例とそれに対する説明を示します。
-
-### コードの修正について
-```
-
-省略せずに修正が反映されたコードすべてを教えてください。
+## 1. 依頼文のリファクタリング
 
 ```
-この質問では、あなたが提供したコード全体に対する修正を求めています。ChatGPT4は、コードの最適化やバグの修正をアシストできます。
+ChatGPT4に伝わりやすい依頼文として、次の内容を日本語でリファクタリングしてください。
 
-### TodoアプリのバックエンドAPIについて
+...
+Postgresqlにおける一対多と多対多の違い、およびそれらの使い分け方について教えてください。
+...
 ```
 
-TodoアプリのバックエンドAPIのサンプルコードを教えてください。
-要件は以下の通りです：
+## 2. コーディング・プログラミング関連
 
+### 2-1. コードの修正
+
+```
+提供されたコード全体に対する修正内容を、省略せずに教えてください。
+```
+
+### 2-2. コード変換
+
+```
+次のTypeScriptコードをJavaScript(ECMAScript)に変換して提供してください。
+...
+```
+
+### 2-3. エラー対処
+
+```
+次のエラーに対する対処法を教えてください。
+...
+```
+
+## 3. データベース関連
+
+### 3-1. Postgresqlの一対多と多対多の違い
+
+```
+Postgresqlにおいて、一対多と多対多の関係性の違い、およびそれぞれの使い道について教えてください。
+```
+
+### 3-2. テーブル設計のリレーション
+
+```
+画像投稿共有アプリにおいて、「ユーザー」「投稿」「タグ」のエンティティ間のリレーションシップについて詳しく説明してください。
+```
+
+### 3-3. スキーマ変換
+
+```
+以下のMongodb、mongooseのスキーマをPostgresql用のSQLに変換してサンプルを提供してください。
+...
+```
+
+## 4. アプリケーション開発関連
+
+### 4-1. TodoアプリのバックエンドAPI
+
+```
+次の要件を満たすTodoアプリのバックエンドAPIのサンプルコードを提供してください。
 - ログイン認証は不要
-- Todoにはidとtitleが含まれます
-- Create、Read、Read-allの機能のみ実装
-
-使用環境・技術は以下の通りです：
-
-- OS: Ubuntu
-- 言語・フレームワーク: JavaScript, Express
-- データベース: PostgreSQL, pg
-
-```
-この質問では、特定の要件に基づいたTodoアプリのバックエンドAPIのサンプルコードの提供を求めています。ChatGPT4は、要件に応じたコードの生成や、使用技術の説明を行うことができます。
-
-### APIのテストコードについて
+- Todoにはidとtitleが含まれる
+- Create、Read、Read-allの機能のみを実装
+- 使用環境・技術: OS: Ubuntu、言語・フレームワーク: JavaScript, Express、データベース: PostgreSQL, pg
 ```
 
-下記のAPIに対するテストコードのサンプルを教えてください。
-
-\=====================================================================
-app.get('/todos', async (req, res) => {
-try {
-const allTodos = await pool.query('SELECT \* FROM todos');
-res.json(allTodos.rows);
-} catch (err) {
-console.error(err.message);
-res.status(500).send('Server Error');
-}
-});
+### 4-2. Todoアプリのフロントエンド
 
 ```
-ここでは、特定のAPIルートに対するテストコードのサンプルを求めています。ChatGPT4は、テストコードの作成方法や、テストライブラリの使用方法についてのアドバイスを提供できます。
-
-### テーブル設計について
+次の要件を満たすTodoアプリのフロントエンドのサンプルコードを提供してください。
+- App.jsファイル内でAPIリクエストのレスポンスを表示
+- APIのエンドポイントは「localhost:3000/todos」
+...
 ```
 
-画像投稿共有アプリのテーブル設計サンプルについて、詳しく教えていただきたいです。特に重要視しているのは、以下のエンティティ間のリレーションです。
+## 5. テストコードに関する質問
 
-ユーザー
-投稿
-タグ
-
-これらのエンティティ間の関係性について、具体的かつ詳細な説明をお願いいたします。
+### 5-1. APIのテストコード
 
 ```
-このセクションでは、データベースのテーブル設計に関する質問を扱います。ChatGPT4は、エンティティ間のリレーションや、テーブル設計のベストプラクティスについての情報を提供できます。
-
-### スキーマ変換について
+以下のAPIルートに対するテストコードのサンプルを教えてください。
+...
 ```
 
-# 下記のMongodb、mongooseのスキーマをPostgresqlに変換したSQLのサンプルを教えてください。
-
-const userSchema = mongoose.Schema(
-  {
-    name: {
-      type: String,
-      required: true,
-    },
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-    },
-    password: {
-      type: String,
-      required: true,
-    },
-    isAdmin: {
-      type: Boolean,
-      required: true,
-      default: false,
-    },
-  },
-  {
-    timestamps: true,
-  }
-);
-
-const reviewSchema = mongoose.Schema(
-  {
-    name: { type: String, required: true },
-    rating: { type: Number, required: true },
-    comment: { type: String, required: true },
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      required: true,
-      ref: 'User',
-    },
-  },
-  {
-    timestamps: true,
-  }
-);
-
-const productSchema = mongoose.Schema(
-  {
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      required: true,
-      ref: 'User',
-    },
-    name: {
-      type: String,
-      required: true,
-    },
-    image: {
-      type: String,
-      required: true,
-    },
-    brand: {
-      type: String,
-      required: true,
-    },
-    category: {
-      type: String,
-      required: true,
-    },
-    description: {
-      type: String,
-      required: true,
-    },
-    reviews: [reviewSchema],
-    rating: {
-      type: Number,
-      required: true,
-      default: 0,
-    },
-    numReviews: {
-      type: Number,
-      required: true,
-      default: 0,
-    },
-    price: {
-      type: Number,
-      required: true,
-      default: 0,
-    },
-    countInStock: {
-      type: Number,
-      required: true,
-      default: 0,
-    },
-  },
-  {
-    timestamps: true,
-  }
-);
-
-const orderSchema = mongoose.Schema(
-  {
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      required: true,
-      ref: 'User',
-    },
-    orderItems: [
-      {
-        name: { type: String, required: true },
-        qty: { type: Number, required: true },
-        image: { type: String, required: true },
-        price: { type: Number, required: true },
-        product: {
-          type: mongoose.Schema.Types.ObjectId,
-          required: true,
-          ref: 'Product',
-        },
-      },
-    ],
-    shippingAddress: {
-      address: { type: String, required: true },
-      city: { type: String, required: true },
-      postalCode: { type: String, required: true },
-      country: { type: String, required: true },
-    },
-    paymentMethod: {
-      type: String,
-      required: true,
-    },
-    paymentResult: {
-      id: { type: String },
-      status: { type: String },
-      update_time: { type: String },
-      email_address: { type: String },
-    },
-    itemsPrice: {
-      type: Number,
-      required: true,
-      default: 0.0,
-    },
-    taxPrice: {
-      type: Number,
-      required: true,
-      default: 0.0,
-    },
-    shippingPrice: {
-      type: Number,
-      required: true,
-      default: 0.0,
-    },
-    totalPrice: {
-      type: Number,
-      required: true,
-      default: 0.0,
-    },
-    isPaid: {
-      type: Boolean,
-      required: true,
-      default: false,
-    },
-    paidAt: {
-      type: Date,
-    },
-    isDelivered: {
-      type: Boolean,
-      required: true,
-      default: false,
-    },
-    deliveredAt: {
-      type: Date,
-    },
-  },
-  {
-    timestamps: true,
-  }
-);
-
-```
-
-この質問では、MongodbのスキーマをPostgresqlのSQLに変換する方法について学ぶことができます。ChatGPT4は、異なるデータベース間でのスキーマ変換の基本や、SQL文の作成についてのサポートを行います。
+依頼文のリファクタリングが最初のセクションとなります。

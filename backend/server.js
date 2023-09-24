@@ -1,11 +1,8 @@
-const express = require('express');
-const app = express();
-const port = 3001;
+import { app } from "./index.js";
 
-app.get('/', (req, res) => {
-    res.json({ message: 'Hello World' });
-});
+const port = process.env.PORT || 3001;
+console.log(process.env.PAYPAL_CLIENT_ID)
 
-app.listen(port, () => {
-    console.log(`App is listening at http://localhost:${port}`);
-});
+app.listen(port, () =>
+    console.log(`Server running in ${process.env.NODE_ENV} mode on port ${port}`)
+);

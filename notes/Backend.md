@@ -141,4 +141,35 @@ app.listen(port, () => {
 });
 ```
 
+## test
+
+testしやすいようにサーバー起動の処理を`server.js`に切り出します。
+
+```
+// nodejs-postgresql/src/index.js
+
+import express from 'express';
+
+const app = express();
+
+app.get('/', (req, res) => {
+    res.json({ message: 'Hello, World!' });
+});
+
+export { app };
+```
+
+```
+// nodejs-postgresql/src/server.js
+
+import { app } from "./index.js";
+
+const port = process.env.PORT || 3001;
+
+app.listen(port, () =>
+    console.log(`Server running in ${process.env.NODE_ENV} mode on port http://localhost:${port}`)
+);
+
+```
+
 これで、Node.js、Jest、PostgreSQL、およびExpressを使用した基本的なバックエンド開発環境のセットアップが完了しました。

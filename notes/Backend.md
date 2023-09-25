@@ -6,40 +6,56 @@
 
 ### 1.1 プロジェクトの初期化
 
+プロジェクトディレクトリを作成し、以下のコマンドでNode.jsプロジェクトを初期化します。
+
 ```sh
 npm init -y
-```
+````
 
 ### 1.2 パッケージJSONの設定
 
-`type`を`module`に設定することで、プロジェクトをESモジュールとして扱います。これにより、Reactとの互換性も確保されます。
+`package.json`ファイルにて、`type`を`module`に設定します。これにより、ES Modulesが利用可能になり、Reactとの互換性も確保されます。
 
 ```json
 {
-  "name": "nodejs",
+  "name": "nodejs-postgresql",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "src/index.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest",
+    "start": "node src/server.js"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/core": "^7.15.5",
+    "@babel/preset-env": "^7.15.6",
+    "babel-jest": "^27.2.3",
+    "jest": "^27.2.3",
+    "supertest": "^6.1.6"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "pg": "^8.7.1"
+  }
 }
 ```
 
 ## 2. Jestのセットアップ
 
-JestはJavaScriptのテストフレームワークです。Jestと関連パッケージを以下のコマンドでインストールします。
+### 2.1 Jestと関連パッケージのインストール
+
+以下のコマンドでJestと、Babelを利用するための関連パッケージをインストールします。
 
 ```sh
 npm install --save-dev jest supertest @babel/core @babel/preset-env babel-jest
 ```
 
-### 2.1 Babelの設定
+### 2.2 Babelの設定
 
-プロジェクトのルートディレクトリに`.babelrc`ファイルを作成し、以下の内容を記述します。
+Babelを設定するために、プロジェクトのルートディレクトリに`.babelrc`ファイルを作成し、以下の内容を記述します。
 
 ```json
 {
@@ -53,9 +69,9 @@ npm install --save-dev jest supertest @babel/core @babel/preset-env babel-jest
 }
 ```
 
-### 2.2 Jestの設定
+### 2.3 Jestの設定
 
-プロジェクトのルートディレクトリに`jest.config.cjs`ファイルを作成し、以下の内容を記述します。
+Jestの設定ファイル`jest.config.cjs`をプロジェクトのルートディレクトリに作成し、以下の内容を記述します。
 
 ```js
 module.exports = {
@@ -71,37 +87,21 @@ module.exports = {
 
 ### 3.1 pgパッケージのインストール
 
+Node.jsからPostgreSQLに接続するための`pg`パッケージをインストールします。
+
 ```sh
 npm install pg
 ```
 
-### 3.2 データベース接続の実装
+### 3.2 データベースとテーブルの作成
 
-`index.js`に以下のコードを記述して、PostgreSQLデータベースに接続します。
-
-```js
-import { Client } from 'pg';
-
-const config = {
-  host: 'localhost',
-  user: 'dev_user',
-  password: 'dev_password',
-  database: 'development_db'
-};
-
-const client = new Client(config);
-
-client.connect()
-  .then(() => console.log('Connected to PostgreSQL'))
-  .catch(err => console.error('Connection error', err.stack))
-  .finally(() => client.end());
-```
-
-### 3.3 データベースとテーブルの作成
-
-以下のSQLクエリを実行し、データベースとテーブルを作成します。
+PostgreSQLにて、以下のSQLクエリを実行し、データベースとテーブルを作成します。
 
 ```sql
+CREATE DATABASE development_db;
+
+\c development_db;
+
 CREATE TABLE Todo (
     id SERIAL PRIMARY KEY,
     title VARCHAR(255) NOT NULL
@@ -110,66 +110,77 @@ CREATE TABLE Todo (
 INSERT INTO Todo (title) VALUES ('Task 1');
 INSERT INTO Todo (title) VALUES ('Task 2');
 INSERT INTO Todo (title) VALUES ('Task 3');
+```
 
-SELECT * FROM Todo;
+### 3.3 データベース接続の実装
+
+`src/index.js`に以下のコードを記述して、PostgreSQLデータベースに接続します。
+
+```js
+import express from 'express';
+import { Client } from 'pg';
+
+const app = express();
+
+app.get('/', async (req, res) => {
+    const config = {
+        host: 'localhost',
+        user: 'dev_user',
+        password: 'dev_password',
+        database: 'development_db'
+    };
+
+    const client = new Client(config);
+    await client.connect();
+
+    try {
+        const result = await client.query('SELECT * FROM todo');
+        res.json(result.rows);
+    } finally {
+        await client.end();
+    }
+});
+
+export { app };
 ```
 
 ## 4. Expressのセットアップ
 
 ### 4.1 Expressパッケージのインストール
 
+WebアプリケーションフレームワークであるExpressをインストールします。
+
 ```sh
 npm install express
 ```
 
-### 4.2 基本的なExpressアプリケーションの作成
+### 4.2 サーバー起動のコードを切り出し
 
-`index.js`を以下のように編集し、基本的なExpressアプリケーションを作成します。
+テストのしやすさを考慮し、サーバーの起動処理を`src/server.js`に切り出します。
 
 ```js
-import express from 'express';
-
-const app = express();
-const port = 3001;
-
-app.get('/', (req, res) => {
-  res.json({ message: 'Hello, World!' });
-});
-
-app.listen(port, () => {
-  console.log(`Server is running at http://localhost:${port}`);
-});
-```
-
-## test
-
-testしやすいようにサーバー起動の処理を`server.js`に切り出します。
-
-```
-// nodejs-postgresql/src/index.js
-
-import express from 'express';
-
-const app = express();
-
-app.get('/', (req, res) => {
-    res.json({ message: 'Hello, World!' });
-});
-
-export { app };
-```
-
-```
 // nodejs-postgresql/src/server.js
 
 import { app } from "./index.js";
 
 const port = process.env.PORT || 3001;
 
-app.listen(port, () =>
-    console.log(`Server running in ${process.env.NODE_ENV} mode on port http://localhost:${port}`)
-);
+app.listen(port, () => {
+    console.log(`Server running on http://localhost:${port}`);
+});
+```
 
+## 5. テストの実行
+
+最後に、以下のコマンドでJestを実行し、テストが正しく通ることを確認します。
+
+```sh
+npx jest
 ```
 
 これで、Node.js、Jest、PostgreSQL、およびExpressを使用した基本的なバックエンド開発環境のセットアップが完了しました。
+
+```
+
+これにより、バックエンド開発の基本的なフローと各ステップでの作業内容が明確になり、読み手にとって理解しやすくなるでしょう。
+```
